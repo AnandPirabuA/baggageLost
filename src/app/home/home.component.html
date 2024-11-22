@@ -1,0 +1,149 @@
+<p-messages [value]="messages ?? []" [enableService]="false" />
+<div class="card">
+    <p-card header="Kindly fill all field">
+        <form [formGroup]="baggageLossForm" (ngSubmit)="save()">
+            <div class="grid">
+                <label class="col-3 vertical-center required-field" for="date">Date of Flight</label>
+                <div class="col-6">
+                    <p-calendar id="date" [style]="{'width':'100%'}" formControlName="date" [maxDate]="maxDate"
+                        [iconDisplay]="'input'" [showIcon]="true" [showButtonBar]="true" dateFormat="dd/mm/yy" />
+                    <br>
+                    @if (baggageLossForm.get('date')?.invalid && baggageLossForm.get('date')?.touched) {
+                    <div class="p-error">
+                        Travel date is required.
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="grid">
+                <label class="col-3 vertical-center required-field" for="origin">Origin of Flight</label>
+                <div class="col-6">
+                    <p-autoComplete [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" id="origin"
+                        formControlName="origin" [suggestions]="(originSuggestionList$|async) ?? []" optionLabel="name"
+                        (completeMethod)="searchOrgin($event)" />
+                    @if (baggageLossForm.getError('sameValue')) {
+                        <div class="p-error">
+                            Orgin and destination cannot be same.
+                        </div>
+                    }
+                    @if (baggageLossForm.get('origin')?.invalid && baggageLossForm.get('origin')?.touched) {
+                    <div class="p-error">
+                        Orgin is required.
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="grid">
+                <label class="col-3 vertical-center required-field" for="destination">Destination of Flight</label>
+                <div class="col-6">
+                    <p-autoComplete [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" id="destination"
+                        formControlName="destination" [suggestions]="(destinationSuggestionList$|async) ?? []"
+                        optionLabel="name" (completeMethod)="searchDestination($event)" />
+                    @if (baggageLossForm.get('destination')?.invalid && baggageLossForm.get('destination')?.touched) {
+                    <div class="p-error">
+                        Destination is required.
+                    </div>
+                    }
+                    @if (baggageLossForm.getError('sameValue')) {
+                        <div class="p-error">
+                            Orgin and destination cannot be same.
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="grid">
+                <label class="col-3 vertical-center required-field" for="itemCount">Number of Missing Items</label>
+                <div class="col-6">
+                    <p-dropdown [style]="{'width':'100%'}" formControlName="baggageLossCount" [options]="itemCounts"
+                        (onChange)="onCountChange($event)" placeholder="Select a Number" />
+                    @if (baggageLossForm.get('baggageLossCount')?.invalid &&
+                    baggageLossForm.get('baggageLossCount')?.touched) {
+                    <div class="p-error">
+                        Baggage Loss Count is required.
+                    </div>
+                    }
+                </div>
+            </div><br><br>
+            @if (items.length > 0) {
+            <div class="grid">
+                <div class="col-3 required-field">
+                    Name of Item
+                </div>
+                <div class="col-3 required-field">
+                    Price
+                </div>
+                <div class="col-3 required-field">
+                    Quantity
+                </div>
+                <div class="col-3">
+                    Total
+                </div>
+            </div>
+            }
+            <ng-container formArrayName="items">
+                @for (item of items.controls; track $index; let i = $index) {
+                <div [formGroupName]="i" class="grid">
+                    <p-inputGroup class="col-3 input-group-container">
+                        <p-inputGroupAddon>
+                            <i class="pi pi-briefcase"></i>
+                        </p-inputGroupAddon>
+                        <input pInputText placeholder="Item Name" formControlName="name" />
+                        @if (item.get('name')?.invalid && item.get('name')?.touched) {
+                        <small class="p-error formArray-error">
+                            Name is required.
+                        </small>
+                        }
+                    </p-inputGroup>
+                    <p-inputGroup class="col-3 input-group-container">
+                        <p-inputGroupAddon>$</p-inputGroupAddon>
+                        <p-inputNumber placeholder="Price" formControlName="price" />
+                        @if (item.get('price')?.invalid && item.get('price')?.touched) {
+                            @if (item.get('price')?.hasError('required')) {
+                                <small class="p-error formArray-error">
+                                    Price is required.
+                                </small>
+                            }
+                            @else {
+                                <small class="p-error formArray-error">
+                                    Invalid Price.
+                                </small>
+                            }
+                        }
+                    </p-inputGroup>
+                    <p-inputGroup class="col-3 input-group-container">
+                        <p-inputNumber inputId="integeronly" placeholder="Count" formControlName="quantity" />
+                        @if (item.get('quantity')?.invalid && item.get('quantity')?.touched) {
+                            @if (item.get('quantity')?.hasError('required')) {
+                                <small class="p-error formArray-error">
+                                    Count is required.
+                                </small>
+                            }
+                            @else {
+                                <small class="p-error formArray-error">
+                                    Invalid Count.
+                                </small>
+                            }
+                        }
+                    </p-inputGroup>
+                    <p-inputGroup class="col-3 input-group-container">
+                        <p-inputGroupAddon>$</p-inputGroupAddon>
+                        <p-inputNumber formControlName="total" class="textbox-disabled" />
+                    </p-inputGroup>
+                </div>
+                }
+            </ng-container>
+            @if (items.length > 0) {
+            <div class="grid total-container">
+                <div class="col-3 col-offset-9">
+                    <label class="total-label">$ Grand Total: {{grandTotal}}</label>
+                </div>
+            </div>
+            }
+            <div class="grid btn-container">
+                <div class="col-12">
+                    <p-button class="save-btn" label="Submit" type="submit" [disabled]="baggageLossForm.invalid" />
+                </div>
+            </div>
+        </form>
+    </p-card>
+</div>
