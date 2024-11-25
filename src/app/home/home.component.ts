@@ -39,7 +39,7 @@ import { differentOriginDestinationValidator } from '../validators/different-ori
     MessagesModule
   ],
   providers: [DialogService],
-  templateUrl: './home.component.html',
+  template: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnDestroy {
